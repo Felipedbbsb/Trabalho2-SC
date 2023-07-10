@@ -109,13 +109,35 @@ def descifrar(cifra, private_key):
         i += 1
     return lista
 
-def assinar(texto: str, public_key):
-    sha3_text = hashlib.sha3_256(texto.encode())
-    text_hash = sha3_text.hexdigest()
-    print("Message hash:", text_hash)
-    hash_cifrado = oaep.oaep_encode(bytes(text_hash.encode()),PADDING_SIZE)
-    return hash_cifrado
+# def assinar(texto: str, private_key):
+#     sha3_text = hashlib.sha3_256(texto.encode())
+#     text_hash = sha3_text.hexdigest()
+#     print("Message hash:", text_hash)
+#     hash_cifrado = cifrar(oaep.oaep_encode(bytes(text_hash.encode()),PADDING_SIZE), private_key)
+#     return hash_cifrado
 
+# def verificar(assinatura, msg):
+#     sha3_text = hashlib.sha3_256(msg.encode())
+#     text_hash = sha3_text.hexdigest()
+#     msg = 
+
+def assinar(msg: list, private_key):
+    # s=h^d (mod n)
+    msg = "".join([str(x) for x in msg])
+    h = hash(msg)
+    n = private_key[0]
+    d = private_key[1]
+    s = pow(h,d,n)
+    return s
+
+def verificar(s, msg: str, public_key):
+    msg = "".join([str(x) for x in msg])
+    h = hash(msg)
+    n = public_key[0]
+    e = public_key[1]
+    _h = pow(s,e,n)
+    print(h,_h)
+    return h == _h
 
 def main():
     plain_text = input("Insira sua mensagem: ")
@@ -135,7 +157,9 @@ def main():
     original_text = oaep.oaep_decode(bytes(original_text), PADDING_SIZE)
     original_text = ''.join([chr(x) for x in original_text])
     print('Mensagem original:', original_text)
-    print("Assinatura:",assinar(plain_text, public_key))
-
+    # Adulterar o valor da private key para gerar um resultado inválido na verificação da assinatura
+    s = assinar(texto_cifrado, private_key)
+    print("Assinatura:",s)
+    print("Verificação da assinatura:", "válido" if verificar(s, texto_cifrado, public_key) else "inválido")
 if __name__ == "__main__":
     main()
