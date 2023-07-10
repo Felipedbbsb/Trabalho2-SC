@@ -116,7 +116,8 @@ def assinar(texto: str, public_key):
     hash_cifrado = oaep.oaep_encode(bytes(text_hash.encode()),PADDING_SIZE)
     return hash_cifrado
 
-if __name__ == "__main__":
+
+def main():
     plain_text = input("Insira sua mensagem: ")
     text = oaep.oaep_encode(bytes(plain_text.encode()),PADDING_SIZE)
     print("Padding adicionado:",text)
@@ -135,3 +136,6 @@ if __name__ == "__main__":
     original_text = ''.join([chr(x) for x in original_text])
     print('Mensagem original:', original_text)
     print("Assinatura:",assinar(plain_text, public_key))
+
+if __name__ == "__main__":
+    main()
