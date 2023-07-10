@@ -3,7 +3,7 @@ import oaep
 import hashlib
 
 KEY_BITS_SIZE = 1024
-PADDING_SIZE = KEY_BITS_SIZE%-41
+PADDING_SIZE = KEY_BITS_SIZE%41
 
 def gcd(a, b):
    while a != 0:
@@ -136,11 +136,11 @@ def verificar(s, msg: str, public_key):
     n = public_key[0]
     e = public_key[1]
     _h = pow(s,e,n)
-    print(h,_h)
+    # print(h,_h)
     return h == _h
 
 def main():
-    plain_text = input("Insira sua mensagem: ")
+    plain_text = "This is an encryption test!"
     text = oaep.oaep_encode(bytes(plain_text.encode()),PADDING_SIZE)
     print("Padding adicionado:",text)
     # public_key é composto por (n, e)
@@ -150,7 +150,7 @@ def main():
     print('Public key:', public_key)
     print('Private key:', private_key)
     texto_cifrado = cifrar(text,public_key)
-    # print('Mensagem cifrada:', text_cipher)
+    # print('Mensagem cifrada:', "".join([str(x) for x in texto_cifrado]))
     original_text = descifrar(texto_cifrado,private_key)
     original_text = b''.join(original_text)
     print("Decifrando:",original_text)
@@ -161,5 +161,6 @@ def main():
     s = assinar(texto_cifrado, private_key)
     print("Assinatura:",s)
     print("Verificação da assinatura:", "válido" if verificar(s, texto_cifrado, public_key) else "inválido")
+    # print(PADDING_SIZE)
 if __name__ == "__main__":
     main()
