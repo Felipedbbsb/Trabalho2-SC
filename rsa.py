@@ -1,5 +1,6 @@
 import random
 import oaep
+import hashlib
 
 KEY_BITS_SIZE = 1024
 PADDING_SIZE = KEY_BITS_SIZE%-41
@@ -83,7 +84,8 @@ def generateKey(key_size):
     private_key = (n, d)
     return (public_key, private_key)
 
-def cifrar(letras,n,e):
+def cifrar(letras, public_key):
+    n,e = public_key[0], public_key[1]
     tam = len(letras)
     i = 0
     texto = []
@@ -94,7 +96,8 @@ def cifrar(letras,n,e):
         i += 1
     return texto
 
-def descifrar(cifra,n,d):
+def descifrar(cifra, private_key):
+    n, d = private_key[0], private_key[1]
     lista = []
     i = 0
     tamanho = len(cifra)
@@ -106,11 +109,16 @@ def descifrar(cifra,n,d):
         i += 1
     return lista
 
+def assinar(texto: str, public_key):
+    sha3_text = hashlib.sha3_256(texto.encode())
+    text_hash = sha3_text.hexdigest()
+    print("Message hash:", text_hash)
+    hash_cifrado = oaep.oaep_encode(bytes(text_hash.encode()),PADDING_SIZE)
+    return hash_cifrado
 
 if __name__ == "__main__":
-    padding_size = PADDING_SIZE
-    text = input("Insira sua mensagem: ")
-    text = oaep.oaep_encode(bytes(text.encode()),padding_size)
+    plain_text = input("Insira sua mensagem: ")
+    text = oaep.oaep_encode(bytes(plain_text.encode()),PADDING_SIZE)
     print("Padding adicionado:",text)
     # public_key é composto por (n, e)
     # n = p*q
@@ -118,11 +126,12 @@ if __name__ == "__main__":
     
     print('Public key:', public_key)
     print('Private key:', private_key)
-    texto_cifrado = cifrar(text,public_key[0],public_key[1])
+    texto_cifrado = cifrar(text,public_key)
     # print('Mensagem cifrada:', text_cipher)
-    original_text = descifrar(texto_cifrado,private_key[0],private_key[1])
+    original_text = descifrar(texto_cifrado,private_key)
     original_text = b''.join(original_text)
     print("Decifrando:",original_text)
-    original_text = oaep.oaep_decode(bytes(original_text), padding_size)
+    original_text = oaep.oaep_decode(bytes(original_text), PADDING_SIZE)
     original_text = ''.join([chr(x) for x in original_text])
     print('Mensagem original:', original_text)
+    print("Assinatura:",assinar(plain_text, public_key))
